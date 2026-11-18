@@ -1,3 +1,21 @@
+name: Build L7N Client
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
       - name: Show ZIP contents
         run: |
           echo "Current directory:"
@@ -9,10 +27,12 @@
 
       - name: Build client
         run: |
-          PROJECT_DIR=$(find . -type f -name "settings.gradle" -printf '%h\n' | head -n 1)
-          if [ -z "$PROJECT_DIR" ]; then
+          SETTINGS_FILE=$(find . -name "settings.gradle" | head -n 1)
+          if [ -z "$SETTINGS_FILE" ]; then
             echo "لم يتم العثور على settings.gradle"
             exit 1
           fi
+          PROJECT_DIR=$(dirname "$SETTINGS_FILE")
           echo "Project found at: $PROJECT_DIR"
           gradle -p "$PROJECT_DIR" build --no-daemon
+          
