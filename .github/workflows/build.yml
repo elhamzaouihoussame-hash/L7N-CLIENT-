@@ -1,52 +1,33 @@
 
-name: Build L7N CLIENT 1.21.11
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main, master ]
+name: Build
+on: workflow_dispatch
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Extract project
-        run: |
-          unzip -q L7N-CLIENT-1.21.11.zip -d extracted
+      - name: Extract client
+        run: unzip -q L7N-CLIENT-1.21.11.zip
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.6.0'
+          gradle-version: '9.2.1'
 
-      - name: Find project and build
-        run: |
-          PROJECT_DIR=$(find extracted -name settings.gradle -o -name settings.gradle.kts | head -n 1 | xargs dirname)
-          if [ -z "$PROJECT_DIR" ]; then
-            PROJECT_DIR=$(find extracted -name build.gradle -o -name build.gradle.kts | head -n 1 | xargs dirname)
-          fi
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Gradle project not found!"
-            exit 1
-          fi
-          echo "Building from: $PROJECT_DIR"
-          cd "$PROJECT_DIR"
-          gradle build --no-daemon
+      - name: Build client
+        run: gradle -p src/l7n-client build --no-daemon
 
-      - name: Upload L7N Client
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: L7N-CLIENT-1.21.11
-          path: extracted/**/build/libs/*.jar
-          if-no-files-found: error
-          
+          name: L7N-CLIENT
+          path: |
+            src/l7n-client/build/libs/*.jar
+            !src/l7n-client/build/libs/*-sources.jar
+            
