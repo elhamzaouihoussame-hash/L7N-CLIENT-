@@ -16,20 +16,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Show ZIP contents
+      - name: Unzip project if zip exists
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Files and folders:"
-          find . -maxdepth 5 -type f \( -name "settings.gradle" -o -name "build.gradle" -o -name "gradlew" \) -print
-          echo "Root folders:"
-          ls -la
+          echo "Looking for zip files..."
+          ZIP_FILE=$(find . -maxdepth 2 -name "*.zip" | head -n 1)
+          if [ -n "$ZIP_FILE" ]; then
+            echo "Found zip file: $ZIP_FILE. Unzipping..."
+            unzip -q "$ZIP_FILE" -d extracted_project
+            echo "Contents after unzip:"
+            ls -la extracted_project
+          else
+            echo "No zip file found, using repository files directly."
+          fi
 
       - name: Build client
         run: |
+          # البحث عن ملف settings.gradle سواء كان في المستودع مباشرة أو داخل مجلد مفكوك
           SETTINGS_FILE=$(find . -name "settings.gradle" | head -n 1)
           if [ -z "$SETTINGS_FILE" ]; then
-            echo "لم يتم العثور على settings.gradle"
+            echo "خطأ: لم يتم العثور على ملف settings.gradle نهائياً."
             exit 1
           fi
           PROJECT_DIR=$(dirname "$SETTINGS_FILE")
