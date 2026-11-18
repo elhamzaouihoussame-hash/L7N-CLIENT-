@@ -1,33 +1,18 @@
-
-name: Build
-on: workflow_dispatch
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Extract client
-        run: unzip -q L7N-CLIENT-1.21.11.zip
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.2.1'
+      - name: Show ZIP contents
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Files and folders:"
+          find . -maxdepth 5 -type f \( -name "settings.gradle" -o -name "build.gradle" -o -name "gradlew" \) -print
+          echo "Root folders:"
+          ls -la
 
       - name: Build client
-        run: gradle -p src/l7n-client build --no-daemon
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: L7N-CLIENT
-          path: |
-            src/l7n-client/build/libs/*.jar
-            !src/l7n-client/build/libs/*-sources.jar
-            
+        run: |
+          PROJECT_DIR=$(find . -type f -name "settings.gradle" -printf '%h\n' | head -n 1)
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "لم يتم العثور على settings.gradle"
+            exit 1
+          fi
+          echo "Project found at: $PROJECT_DIR"
+          gradle -p "$PROJECT_DIR" build --no-daemon
