@@ -14,7 +14,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Unzip project if zip exists
         run: |
@@ -31,7 +31,6 @@ jobs:
 
       - name: Build client
         run: |
-          # البحث عن ملف settings.gradle سواء كان في المستودع مباشرة أو داخل مجلد مفكوك
           SETTINGS_FILE=$(find . -name "settings.gradle" | head -n 1)
           if [ -z "$SETTINGS_FILE" ]; then
             echo "خطأ: لم يتم العثور على ملف settings.gradle نهائياً."
